@@ -1,4 +1,4 @@
-package com.nsuscevic.kafka.tutorial2;
+package kafka.tutorial2;
 
 import com.google.common.collect.Lists;
 import com.twitter.hbc.ClientBuilder;
@@ -28,7 +28,7 @@ public class TwitterProducer {
     private String token = "1102266160563789824-dL45c0I83iikXcH31vEZEzVd6pPSWw";
     private String tokenSecret = "MpeyDC48hyp5GUFohMzVVr1CZea4HUn6x0rRDx8dTwxpz";
 
-    private List<String> terms = Lists.newArrayList("kafka");
+    private List<String> terms = Lists.newArrayList("bitcoin", "usa", "politics", "sport", "soccer");
 
     private Logger logger = LoggerFactory.getLogger(TwitterProducer.class.getName());
 
@@ -121,6 +121,11 @@ public class TwitterProducer {
         properties.setProperty(ProducerConfig.ACKS_CONFIG, "all");
         properties.setProperty(ProducerConfig.RETRIES_CONFIG, Integer.toString(Integer.MAX_VALUE));
         properties.setProperty(ProducerConfig.MAX_IN_FLIGHT_REQUESTS_PER_CONNECTION, "5"); // kafka 2.0 >= 1.1 so we can keep this as 5. Use 1 otherwise.
+
+        // create high throughput producer (at the expanse of a bit of latency and CPU usage)
+        properties.setProperty(ProducerConfig.COMPRESSION_TYPE_CONFIG, "snappy");
+        properties.setProperty(ProducerConfig.LINGER_MS_CONFIG, "20");
+        properties.setProperty(ProducerConfig.BATCH_SIZE_CONFIG, Integer.toString(32 * 1024));
 
         // create the producer
         KafkaProducer<String, String> producer = new KafkaProducer<String, String>(properties);
