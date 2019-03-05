@@ -2,6 +2,7 @@ package kafka.tutorial4;
 
 import com.google.gson.JsonParser;
 import org.apache.kafka.common.serialization.Serdes;
+import org.apache.kafka.streams.KafkaStreams;
 import org.apache.kafka.streams.StreamsBuilder;
 import org.apache.kafka.streams.StreamsConfig;
 import org.apache.kafka.streams.kstream.KStream;
@@ -24,14 +25,15 @@ public class StreamsFilterTweets {
         StreamsBuilder streamsBuilder = new StreamsBuilder();
 
         // input topic
-        KStream<String, String> inputTopic = streamsBuilder.stream("twitter_topics");
+        KStream<String, String> inputTopic = streamsBuilder.stream("twitter_tweets");
         KStream<String, String> filteredStreams = inputTopic.filter((k, jsonTweet) -> extractUserFollowerFromTweet(jsonTweet) > 10000);
         filteredStreams.through("important_tweets");
 
         // build the topology
-
+        KafkaStreams kafkaStreams = new KafkaStreams(streamsBuilder.build(), properties);
 
         // start our stream application
+        kafkaStreams.start();
     }
 
     private static Integer extractUserFollowerFromTweet(String tweetJson) {
