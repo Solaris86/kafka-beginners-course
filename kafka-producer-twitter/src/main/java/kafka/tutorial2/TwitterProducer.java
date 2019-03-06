@@ -15,6 +15,9 @@ import org.apache.kafka.common.serialization.StringSerializer;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+import java.io.FileInputStream;
+import java.io.IOException;
+import java.io.InputStream;
 import java.util.List;
 import java.util.Properties;
 import java.util.concurrent.BlockingQueue;
@@ -23,18 +26,23 @@ import java.util.concurrent.TimeUnit;
 
 public class TwitterProducer {
 
-    private String consumerKey = "8YbsTTJo3hJo2lUMfhK7lEV0E";
-    private String consumerSecret = "IjZquON92NdwJewcpHi0YgFRFsPFLrf3HOxkBBOCarPX1v1Zmk";
-    private String token = "1102266160563789824-dL45c0I83iikXcH31vEZEzVd6pPSWw";
-    private String tokenSecret = "MpeyDC48hyp5GUFohMzVVr1CZea4HUn6x0rRDx8dTwxpz";
+    private String consumerKey;
+    private String consumerSecret;
+    private String token;
+    private String tokenSecret;
 
     private List<String> terms = Lists.newArrayList("bitcoin", "usa", "politics", "sport", "soccer");
 
     private Logger logger = LoggerFactory.getLogger(TwitterProducer.class.getName());
 
-    public TwitterProducer() {}
+    public TwitterProducer() throws IOException {
+        this.consumerKey = loadProperty("twitter.client.consumerKey");
+        this.consumerSecret = loadProperty("twitter.client.consumerSecret");
+        this.token = loadProperty("twitter.client.token");
+        this.tokenSecret = loadProperty("twitter.client.token.secret");
+    }
 
-    public static void main(String[] args) {
+    public static void main(String[] args) throws IOException {
         new TwitterProducer().run();
     }
 
@@ -130,5 +138,13 @@ public class TwitterProducer {
         // create the producer
         KafkaProducer<String, String> producer = new KafkaProducer<String, String>(properties);
         return producer;
+    }
+
+    public String loadProperty(String key) throws IOException {
+        InputStream fis = new FileInputStream("application.properties");
+        Properties props = new Properties();
+        props.load(fis);
+
+        return props.getProperty(key);
     }
 }
